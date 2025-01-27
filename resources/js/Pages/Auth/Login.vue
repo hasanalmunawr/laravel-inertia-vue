@@ -30,7 +30,6 @@ const submitLogin = ()  => {
                     <div class="row">
                         <div class="col-12">
                             <div class="mb-5">
-                                {{ loginForm }}
                                 <h3>Log in</h3>
                             </div>
                         </div>

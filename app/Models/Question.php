@@ -10,8 +10,17 @@ class Question extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function booted()
+    {
+        static::creating(function (Question $question) {
+            $question->slug = str($question->title)->slug();
+        });
     }
 }

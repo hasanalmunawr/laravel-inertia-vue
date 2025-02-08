@@ -8,6 +8,18 @@ const registerForm = useForm({
     password: '',
     password_confirmation: ''
 })
+
+const submitRegister = () => {
+    registerForm.post(route('register.store'), {
+        onSuccess: () => {
+            alert("Register Success")
+            console.log("Register Success")
+        },
+        onError: () => {
+            console.log("Register Failed")
+        }
+    })
+}
 </script>
 
 
@@ -24,40 +36,46 @@ const registerForm = useForm({
                             </div>
                         </div>
                     </div>
-                    <form @submit.prevent="registerForm.post('/register')">
+                    <form @submit.prevent="submitRegister">
                         <div class="row gy-2 overflow-hidden">
                             <div class="col-12">
                                 <div class="form-floating mb-3">
-                                    <input type="text" class="form-control is-invalid" v-model="registerForm.name" name="name" id="name"
+                                    <input type="text" class="form-control" :class="{ 'is-invalid': registerForm.errors.name }" v-model="registerForm.name" name="name" id="name"
                                            placeholder="Name">
                                     <label for="name" class="form-label">Name</label>
-                                    <div class="invalid-feedback">
-                                        The name field is required
+                                    <div class="invalid-feedback" v-if="registerForm.errors.name">
+                                        {{ registerForm.errors.name }}
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating mb-3">
-                                    <input type="email" class="form-control is-valid" v-model="registerForm.email" name="email" id="email"
+                                    <input type="email" class="form-control" :class="{ 'is-invalid': registerForm.errors.email }" v-model="registerForm.email" name="email" id="email"
                                            placeholder="Email">
                                     <label for="email" class="form-label">Email</label>
-                                    <div class="valid-feedback">
-                                        The Email field is required
+                                    <div class="invalid-feedback" v-if="registerForm.errors.email">
+                                        {{ registerForm.errors.email }}
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating mb-3">
-                                    <input type="password" class="form-control" v-model="registerForm.password" name="password" id="password"
+                                    <input type="password" class="form-control" :class="{ 'is-invalid': registerForm.errors.password }" v-model="registerForm.password" name="password" id="password"
                                            value="" placeholder="Password">
                                     <label for="password" class="form-label">Password</label>
+                                    <div class="invalid-feedback" v-if="registerForm.errors.password">
+                                        {{ registerForm.errors.password }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating mb-3">
-                                    <input type="password" class="form-control" v-model="registerForm.password_confirmation" name="password_confirmation"
+                                    <input type="password" class="form-control" :class="{ 'is_invalid': registerForm.errors.password_confirmation }" v-model="registerForm.password_confirmation" name="password_confirmation"
                                            id="password_confirmation" value="" placeholder="Password">
                                     <label for="password" class="form-label">Password Confirmation</label>
+                                    <div class="invalid-feedback" v-if="registerForm.errors.password_confirmation">
+                                        {{ registerForm.errors.password_confirmation }}
+                                    </div>
                                 </div>
                             </div>
 

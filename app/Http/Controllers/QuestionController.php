@@ -3,24 +3,38 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreQuestionRequest;
+use App\Http\Resources\AnswerResource;
 use App\Http\Resources\QuestionResource;
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class QuestionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $filter = $request->query('filter', 'latest');
+
         $questions = QuestionResource::collection(
             Question::with('user')
+                ->when($filter === 'mine', function ($query) {
+                    $query->mine();
+                })
+                ->when($filter === 'unanswered', function ($query) {
+                    $query->unanswered();
+                })
+                ->when($filter === 'scored', function ($query) {
+                    $query->scored();
+                })
                 ->latest()
                 ->paginate(15));
 
         return inertia('Questions/Index', [
-            "questions" => $questions
+            "questions" => $questions,
+            "filter" => $filter,
         ]);
     }
 
@@ -51,7 +65,10 @@ class QuestionController extends Controller
     {
 
             return inertia('Questions/Show', [
-                "question" => QuestionResource::make($question)
+                "question" => QuestionResource::make($question),
+                "answers" => AnswerResource::collection(
+                    $question->answers()->latest()->paginate(5)
+                )
             ]);
     }
 
@@ -68,7 +85,11 @@ class QuestionController extends Controller
      */
     public function update(Request $request, Question $question)
     {
-        //
+        Gate::authorize('update', $question);
+
+        $question->update($request->only(['title', 'body']));
+
+        return back()->with('success', 'Question updated successfully');
     }
 
     /**
@@ -76,6 +97,10 @@ class QuestionController extends Controller
      */
     public function destroy(Question $question)
     {
-        //
+        Gate::authorize('delete', $question);
+
+        $question->delete();
+
+        return back()->with('success', 'Question deleted successfully');
     }
 }

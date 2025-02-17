@@ -1,33 +1,70 @@
 <script setup>
-import { Link, Head } from "@inertiajs/vue3";
+import {Link, Head, usePage, router} from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import QuestionSummary from "@/components/Question/QuestionSummary.vue";
 import Pagination from "@/components/Pagination.vue";
-import QuestionForm from "@/components/Question/QuestionForm.vue";
-import Modal from "@/components/Modal.vue";
-import { onMounted, reactive } from "vue";
-import * as bootstrap from 'bootstrap';
+import CreateQuestionForm from "@/components/Question/CreateQuestionForm.vue";
+import {computed, onMounted, reactive, ref} from "vue";
+import EditQuestionForm from "@/components/Question/EditQuestionForm.vue";
+import useModal from "../../Composables/useModal.js";
+
+const { Modal, showModal, hideModal, modalTitle} = useModal('#question-modal')
 
 defineProps({
     questions: {
         type: Object,
         required: true
+    },
+    filter: String
+})
+
+// const state = reactive({
+//     modalRef: null,
+//     modalTitle: "Ask Question"
+// })
+
+const question = reactive({
+    id: null,
+    title: null,
+    body: null
+})
+
+const editing = ref(false);
+
+const page = usePage();
+const isLoggedIn = computed(() => page.props.user)
+
+
+const editQuestion = (payload) => {
+    editing.value = true;
+    modalTitle.value = "Edit Question"
+    console.log("Editting" + payload.title)
+    question.id = payload.id
+    question.title = payload.title
+    question.body = payload.body
+
+
+    showModal();
+}
+
+const askQuestion = () => {
+    modalTitle.value =  "Ask Question"
+    //
+    // // Reset data question agar tidak membawa data dari edit sebelumnya
+    // question.id = null;
+    // question.title = "";
+    // question.body = "";
+
+    showModal();
+}
+
+const removeQuestion = (payload) => {
+    if (confirm('are you sure want to delete the ' + payload.title + ' ?')) {
+        router.delete(route('questions.destroy', payload.id), {
+            preserveScroll: true
+        })
     }
-})
-
-const state = reactive({
-    modalRef: null
-})
-
-onMounted(() => {
-    state.modalRef = new bootstrap.Modal('#question-form', {
-        backdrop: 'static',
-        keyboard: false
-    })
-})
-
-const showModal = () => state.modalRef.show();
-const hideModal = () => state.modalRef.hide();
+}
 
 </script>
 
@@ -43,7 +80,13 @@ const hideModal = () => state.modalRef.hide();
                     </div>
                     <div class="card mt-3">
                         <ul class="list-group list-group-flush">
-                            <QuestionSummary v-for="question in questions.data" :key="question.id" :question="question" />
+                            <QuestionSummary
+                                v-for="question in questions.data"
+                                :key="question.id"
+                                :question="question"
+                                @edit="editQuestion"
+                                @remove="removeQuestion"
+                            />
                         </ul>
                     </div>
 
@@ -51,21 +94,21 @@ const hideModal = () => state.modalRef.hide();
                 </div>
                 <div class="col-md-3">
                     <div class="d-grid">
-                        <button class="btn btn-primary" @click="showModal">Ask Question</button>
+                        <button class="btn btn-primary" @click="askQuestion">Ask Question</button>
                     </div>
 
                     <ul class="nav nav-underline flex-column mt-4">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Latest</a>
+                            <Link class="nav-link"  :class="{ active: filter === 'latest'}" href="/?filter=latest">Latest</Link>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Unanswered</a>
+                            <Link class="nav-link" :class="{ active: filter === 'unanswered'}"  href="/?filter=unanswered">Unanswered</Link>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Scored</a>
+                            <Link class="nav-link" :class="{ active: filter === 'scored'}"  href="/?filter=scored">Scored</Link>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Mine</a>
+                        <li class="nav-item" v-if="isLoggedIn">
+                            <Link class="nav-link" :class="{ active: filter === 'mine'}"  href="/?filter=mine">Mine</Link>
                         </li>
                     </ul>
                     <h2 class="fs-5 mt-5">Related Tags</h2>
@@ -84,17 +127,12 @@ const hideModal = () => state.modalRef.hide();
             </div>
         </div>
 
-        <Modal id="question-form" title="Ask Question" size="large" scrollable>
-            <QuestionForm @success="hideModal"></QuestionForm>
+        <Modal id="question-modal" :title="modalTitle" size="large" scrollable>
+            <EditQuestionForm :question="question" @success="hideModal" v-if="editing"/>
+            <CreateQuestionForm :question="question" @success="hideModal" v-else />
         </Modal>
 
     </AppLayout>
-<!--<h1>Welcome!</h1>-->
-<!--    <div v-for="question in questions" :key="question.id">-->
-<!--        <Link :href="route('questions.show', question.id)">-->
-<!--        {{ question.title }}-->
-<!--        </Link>-->
-<!--    </div>-->
 </template>
 
 <style scoped>

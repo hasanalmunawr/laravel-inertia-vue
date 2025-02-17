@@ -31,7 +31,7 @@ const submitRegister = () => {
                 <div class="card-body py-4 px-5">
                     <div class="row">
                         <div class="col-12">
-                            <div class="mb-5">
+                            <div class="mb-5 text-center">
                                 <h3>Register</h3>
                             </div>
                         </div>

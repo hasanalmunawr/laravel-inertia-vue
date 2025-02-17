@@ -41,9 +41,13 @@ const logout = () => {
                             <li><a class="dropdown-item" href="#" @click.prevent="logout">Logout</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item mx-2" v-else>
-                        <Link :href="route('login')" class="btn btn-outline-secondary">Log in</Link>
-                        <Link :href="route('register')" class="btn btn-primary">Sign up</Link>
+                    <li class="nav-item" v-else>
+                        <Link :href="route('login')" class="btn btn-outline-secondary  mx-2">
+                            Log in
+                        </Link>
+                        <Link :href="route('register')" class="btn btn-primary">
+                            Sign up
+                        </Link>
                     </li>
                 </ul>
             </div>

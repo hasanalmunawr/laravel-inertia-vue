@@ -28,9 +28,12 @@ const classes = computed(() => {
 })
 
 const modalRef = ref(null)
+
+const emit = defineEmits(['hidden'])
+
 onMounted(() => {
     modalRef.value.addEventListener('hidden.bs.modal', event => {
-        console.log("hidden")
+        emit("hidden")
     })
 })
 </script>

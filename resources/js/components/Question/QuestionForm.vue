@@ -1,19 +1,52 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
+import {watch} from "vue";
 
-const form = useForm({
-    title: '',
-    body: ''
+const props = defineProps({
+    question: {
+        type: Object,
+        required: true
+    },
+    method: String,
+    action: {
+        type: String,
+        required: true
+    }
 })
 
+const formData = {
+    id: props.question.id,
+    title: props.question.title,
+    body: props.question.body
+}
+
+if (props.method) {
+    formData._method = props.method
+}
+
+const form = useForm(formData)
 const emit = defineEmits(['success'])
 
+// Watch perubahan props.question untuk reset form setiap kali modal dibuka
+watch(
+    () => props.question,
+    (newQuestion) => {
+        form.id = newQuestion.id || null;
+        form.title = newQuestion.title || "";
+        form.body = newQuestion.body || "";
+
+        if (props.method) {
+            form._method = props.method;
+        }
+    },
+    { deep: true, immediate: true }
+);
+
 const createQuestion = () => {
-    form.post(route('questions.store'), {
+    form.post(props.action, {
         onSuccess: () => {
             form.reset()
             emit('success')
-            console.log("sucess creat question")
         },
         onError: () => {
             console.log('error rek')
@@ -74,7 +107,7 @@ const createQuestion = () => {
 
             <div class="d-flex justify-content-end mx-2">
                 <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Post</button>
+                <button type="submit" class="btn btn-primary">{{ question.id ? "Update" : "Post" }}</button>
             </div>
         </form>
 </template>

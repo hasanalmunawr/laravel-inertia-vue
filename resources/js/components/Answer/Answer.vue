@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import Author from "@/components/Author.vue";
 import ActionButton from "@/components/ActionButton.vue";
 import {router} from "@inertiajs/vue3";
@@ -22,6 +22,17 @@ const removeAnswer = () => {
         onError: () => {
 
         }
+    })
+}
+
+const answerStatClass = computed(() => ({
+    'answer-accepted': props.answer.is_best,
+    'text-secondary': !props.answer.is_best
+}));
+
+const acceptedAnswer = () => {
+    router.post(route('questions.answers.accept', props.answer.id), {}, {
+        preserveScroll: true
     })
 }
 
@@ -56,8 +67,8 @@ const removeAnswer = () => {
                             d="M2 2v13.5a.5.5 0 0 0 .74.439L8 13.069l5.26 2.87A.5.5 0 0 0 14 15.5V2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2"/>
                     </svg>
                 </button>
-                <button title="Mark the answer ans accepted"
-                        class="btn p-0 answer-accepted">
+                <button  title="Mark the answer ans accepted" :disabled="!answer.can_be.accept" @click="acceptedAnswer"
+                        class="btn p-0" :class="answerStatClass">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                          fill="currentColor"
                          class="bi bi-check-lg icon-lg" viewBox="0 0 16 16">
@@ -67,6 +78,7 @@ const removeAnswer = () => {
                 </button>
             </div>
         </div>
+
         <div class="post-col actionable">
             <div class="question-body" v-html="answer.body">
 
@@ -85,5 +97,7 @@ const removeAnswer = () => {
 </template>
 
 <style scoped>
-
+.btn:disabled {
+    border-color: transparent;
+}
 </style>

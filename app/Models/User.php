@@ -55,6 +55,26 @@ class User extends Authenticatable
         return $this->hasMany(Answer::class);
     }
 
+    public function bookmarks()
+    {
+        return $this->belongsToMany(Question::class, 'bookmarks')->withTimestamps();
+    }
+
+
+
+    public function vote($relationship, $model, $vote)
+    {
+        if ($relationship->where('votable_id', $model->id)->exists()) {
+            $relationship->updateExistingPivot($model, ['vote' => $vote]);
+        } else {
+            $relationship->attach($model, ['vote' => $vote]);
+        }
+
+        $model->load('votes');
+        $model->votes_count = $model->votes()->sum('vote');
+        $model->save();
+    }
+
     public function avatarUrl()
     {
         $email = strtolower(trim($this->email));
